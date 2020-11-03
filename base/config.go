@@ -12,9 +12,6 @@ var (
 
 	// MQTT 发送控制指令 channel
 	MqttControlCh  chan *SendPacket
-
-	// MQTT 状态订阅消息 channel
-	MqttStatusCh  chan *ReceivePacket
 )
 
 // 配置
@@ -34,6 +31,9 @@ type Config struct {
 	// MQTT主题订阅频道
 	MqttChannel int
 
+	// Rabbit MQ 连接字符串
+	RabbitMQAddress string
+
 	// 日志级别
 	LogLevel	int
 
@@ -42,22 +42,23 @@ type Config struct {
 }
 
 // 初始化默认配置
-func InitConfig(channel int) {
+func InitConfig() {
 	DefaultConfig.MqttServerAddress = "tcp://192.168.1.120:1883"
 	DefaultConfig.MqttServerHttp = "http://192.168.1.120:18083"
-	DefaultConfig.MqttChannel = channel
+	DefaultConfig.MqttChannel = 1
 	DefaultConfig.MqttUsername = "glaucus"
 	DefaultConfig.MqttPassword = "123456"
+	DefaultConfig.RabbitMQAddress = "amqp://guest:guest@localhost:5672/"
 	DefaultConfig.LogLevel = 3
 	DefaultConfig.LogToConsole = true
 }
 
 // 载入配置文件
-func LoadConfig(channel int)  {
-	file, err := os.Open("./conf.json")
+func LoadConfig()  {
+	file, err := os.Open("./config.json")
 	if err != nil {
 		fmt.Printf("cannot open the config file.\n")
-		InitConfig(channel)
+		InitConfig()
 		return
 	}
 
@@ -69,15 +70,12 @@ func LoadConfig(channel int)  {
 	err = decoder.Decode(&DefaultConfig)
 	if err != nil {
 		fmt.Printf("cannot parse the config file.\n")
-		InitConfig(channel)
+		InitConfig()
 		return
 	}
-
-	DefaultConfig.MqttChannel = channel
 }
 
 // 初始化全局 channel
 func InitChannel() {
 	MqttControlCh = make(chan *SendPacket)
-	MqttStatusCh = make(chan *ReceivePacket, 10)
 }
