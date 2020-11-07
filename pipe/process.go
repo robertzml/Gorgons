@@ -27,7 +27,8 @@ func Process() {
 		fmt.Println("send service is close.")
 	}()
 
-	queue, err := rbChannel.QueueDeclare("ControlQueue", true, false, false, false, nil)
+	queueName := "LogQueue"
+	queue, err := rbChannel.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -39,16 +40,17 @@ func Process() {
 		panic(err)
 	}
 
-	forever := make(chan bool)
+	// forever := make(chan bool)
 
-	go func() {
-		for d := range msgs {
-			log.Printf("Received a message: %s", d.Body)
 
-			d.Ack(false)
-		}
-	}()
+	for d := range msgs {
+
+		log.Printf("Received a tag: %d, message: %s", d.DeliveryTag, d.Body)
+
+		d.Ack(false)
+	}
+
 
 	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	<- forever
+	// <- forever
 }

@@ -17,7 +17,10 @@ func main() {
 	base.LoadConfig()
 
 	// 启动接收数据处理
-	startPipe()
+	go startPipe()
+
+	// 阻塞
+	select{}
 }
 
 // 启动接收数据处理
