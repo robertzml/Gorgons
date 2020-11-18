@@ -1,6 +1,7 @@
 package mqtt
 
 import (
+	"fmt"
 	paho "github.com/eclipse/paho.mqtt.golang"
 	"github.com/robertzml/Gorgons/glog"
 )
@@ -65,4 +66,10 @@ func (m *MQTT) Unsubscribe(topic string) (err error) {
 func (m *MQTT) Publish(topic string, qos byte, payload string) {
 	token := m.client.Publish(topic, qos, false, payload)
 	token.Wait()
+}
+
+// 默认订阅消息处理方法
+func defaultHandler(client paho.Client, msg paho.Message) {
+	glog.Write(4, packageName, "defaultHandler", fmt.Sprintln("TOPIC: %s, Id: %d, QoS: %d\tMSG: %s",
+		msg.Topic(), msg.MessageID(), msg.Qos(), msg.Payload()))
 }

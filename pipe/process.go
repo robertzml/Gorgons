@@ -27,7 +27,7 @@ func Process() {
 		fmt.Println("send service is close.")
 	}()
 
-	queueName := "LogQueue"
+	queueName := "ControlQueue"
 	queue, err := rbChannel.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
 		panic(err)
