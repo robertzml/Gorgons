@@ -65,7 +65,7 @@ func Process(snap db.Snapshot) {
 
 	for d := range msgs {
 
-		pak := new(queuePacket)
+		pak := new(queueControlPacket)
 		if err = json.Unmarshal(d.Body, pak); err != nil {
 			glog.Write(2, packageName, "process", "deserialize queue packet failed, "+err.Error())
 			d.Ack(false)
@@ -87,7 +87,7 @@ func Process(snap db.Snapshot) {
 /*
  拼接热水器控制报文，并下发到mqtt
 */
-func waterHeaterControl(qp *queuePacket) {
+func waterHeaterControl(qp *queueControlPacket) {
 	waterHeater := equipment.NewWaterHeaterContext(snapshot)
 
 	if mainboardNumber, exist := waterHeater.GetMainboardNumber(qp.SerialNumber); exist {
