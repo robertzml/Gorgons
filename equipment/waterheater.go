@@ -13,6 +13,15 @@ type waterHeaterContext struct {
 	snapshot 	db.Snapshot
 }
 
+// 热水器设置状态
+type WaterHeaterSetting struct {
+	SerialNumber      	string
+	SetActivateTime		int64
+	Activate        	int8
+	Unlock            	int8
+	DeadlineTime    	int64
+}
+
 func NewWaterHeaterContext(snap db.Snapshot) *waterHeaterContext {
 	context := new(waterHeaterContext)
 	context.snapshot = snap
@@ -31,4 +40,28 @@ func (context *waterHeaterContext) GetMainboardNumber(serialNumber string) (main
 	} else {
 		return mn,true
 	}
+}
+
+// 获取热水器设置状态
+func (context *waterHeaterContext) LoadSetting(serialNumber string) (exists bool, setting *WaterHeaterSetting) {
+	context.snapshot.Open()
+	defer context.snapshot.Close()
+
+	setting = new(WaterHeaterSetting)
+
+	if !context.snapshot.Exists(waterHeaterPrefix + "setting_" + serialNumber) {
+		return false, setting
+	}
+
+	context.snapshot.Load(waterHeaterPrefix + "setting_" + serialNumber, setting)
+
+	return true, setting
+}
+
+// 保存热水器设置状态
+func (context *waterHeaterContext) SaveSetting(setting *WaterHeaterSetting) {
+	context.snapshot.Open()
+	defer context.snapshot.Close()
+
+	context.snapshot.Save(waterHeaterPrefix + "setting_" + setting.SerialNumber, setting)
 }
