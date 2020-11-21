@@ -6,6 +6,7 @@ import (
 	"github.com/robertzml/Gorgons/glog"
 	"github.com/robertzml/Gorgons/mqtt"
 	"github.com/robertzml/Gorgons/pipe"
+	"github.com/robertzml/Gorgons/redis"
 )
 
 func main() {
@@ -24,6 +25,9 @@ func main() {
 	// 启动日志服务
 	glog.InitGlog()
 	go startLog()
+
+	// 初始化redis连接池
+	_ = redis.Init()
 
 	// 启动 MQTT订阅服务
 	mqtt.InitMQTT()

@@ -1,7 +1,7 @@
 package pipe
 
 // 队列发送包类型
-type packet struct {
+type queuePacket struct {
 	SerialNumber	string
 	DeviceType		int
 	ControlType		int

@@ -31,6 +31,15 @@ type Config struct {
 	// Rabbit MQ 连接字符串
 	RabbitMQAddress string
 
+	// Redis 数据库序号
+	RedisDatabase int
+
+	// Redis 服务器地址
+	RedisServerAddress string
+
+	// Redis 密码
+	RedisPassword 	string
+
 	// 日志级别
 	LogLevel	int
 

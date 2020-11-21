@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/robertzml/Gorgons/base"
 	"github.com/robertzml/Gorgons/glog"
+	"github.com/robertzml/Gorgons/send"
 	"github.com/streadway/amqp"
 )
 
@@ -52,7 +53,7 @@ func Process() {
 
 	for d := range msgs {
 
-		pak := new(packet)
+		pak := new(queuePacket)
 		if err = json.Unmarshal(d.Body, pak); err != nil {
 			glog.Write(2, packageName, "process", "deserialize queue packet failed, " + err.Error())
 			d.Ack(false)
@@ -61,11 +62,31 @@ func Process() {
 
 		glog.Write(4, packageName, "process", fmt.Sprintf("receive queue tag: %d, packet: %+v", d.DeliveryTag, pak))
 
+		if pak.DeviceType == 1 {
+			waterHeaterControl(pak)
+		} else {
+			glog.Write(3, packageName, "process", "unknown device.")
+		}
 
 		d.Ack(false)
 	}
 }
 
-func waterHeaterControl(pak packet) {
+/*
+ 拼接热水器控制报文，并下发到mqtt
+ */
+func waterHeaterControl(qp *queuePacket) {
 
+	sp := new(base.SendPacket)
+	sp.SerialNumber = qp.SerialNumber
+
+	controlMsg := send.NewWHControlMessage(qp.SerialNumber, "")
+
+	switch qp.ControlType {
+	case 1:
+		sp.Payload = controlMsg.Power(qp.Option)
+	}
+
+	glog.Write(4, packageName, "control", fmt.Sprintf("sn: %s. MQTT control producer.", qp.SerialNumber))
+	base.MqttControlCh <- sp
 }
