@@ -1,11 +1,11 @@
 package pipe
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/robertzml/Gorgons/base"
 	"github.com/robertzml/Gorgons/glog"
 	"github.com/streadway/amqp"
-	"log"
 )
 
 const (
@@ -52,8 +52,20 @@ func Process() {
 
 	for d := range msgs {
 
-		log.Printf("Received a tag: %d, message: %s", d.DeliveryTag, d.Body)
+		pak := new(packet)
+		if err = json.Unmarshal(d.Body, pak); err != nil {
+			glog.Write(2, packageName, "process", "deserialize queue packet failed, " + err.Error())
+			d.Ack(false)
+			continue
+		}
+
+		glog.Write(4, packageName, "process", fmt.Sprintf("receive queue tag: %d, packet: %+v", d.DeliveryTag, pak))
+
 
 		d.Ack(false)
 	}
+}
+
+func waterHeaterControl(pak packet) {
+
 }
