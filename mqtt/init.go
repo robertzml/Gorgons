@@ -6,14 +6,6 @@ import (
 	"github.com/robertzml/Gorgons/glog"
 )
 
-var (
-	// 全局MQTT 接收连接
-	ReceiveMqtt *MQTT
-
-	// 全局MQTT 发送连接
-	SendMqtt *MQTT
-)
-
 // 当前包名称
 const packageName = "mqtt"
 
@@ -44,5 +36,5 @@ func InitMQTT() {
 	paho.ERROR = MLogger{1}
 	paho.CRITICAL = MLogger{0}
 	paho.WARN = MLogger{2}
-	paho.DEBUG = MLogger{4}
+	// paho.DEBUG = MLogger{4}
 }

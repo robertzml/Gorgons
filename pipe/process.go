@@ -3,8 +3,14 @@ package pipe
 import (
 	"fmt"
 	"github.com/robertzml/Gorgons/base"
+	"github.com/robertzml/Gorgons/glog"
 	"github.com/streadway/amqp"
 	"log"
+)
+
+const (
+	// 当前包名称
+	packageName = "pipe"
 )
 
 /*
@@ -22,9 +28,13 @@ func Process() {
 	}
 
 	defer func() {
+		if r := recover(); r != nil {
+			glog.Write(1, packageName, "process", fmt.Sprintf("catch runtime panic in process: %v", r))
+		}
+
 		rmConnection.Close()
 		rbChannel.Close()
-		fmt.Println("send service is close.")
+		glog.Write(3, packageName, "process", "process service is close.")
 	}()
 
 	queueName := "ControlQueue"
@@ -40,17 +50,10 @@ func Process() {
 		panic(err)
 	}
 
-	// forever := make(chan bool)
-
-
 	for d := range msgs {
 
 		log.Printf("Received a tag: %d, message: %s", d.DeliveryTag, d.Body)
 
 		d.Ack(false)
 	}
-
-
-	log.Printf(" [*] Waiting for messages. To exit press CTRL+C")
-	// <- forever
 }
