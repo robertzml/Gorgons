@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/robertzml/Gorgons/base"
+	"github.com/robertzml/Gorgons/db"
+	"github.com/robertzml/Gorgons/equipment"
 	"github.com/robertzml/Gorgons/glog"
 	"github.com/robertzml/Gorgons/send"
 	"github.com/streadway/amqp"
@@ -14,10 +16,17 @@ const (
 	packageName = "pipe"
 )
 
+var (
+	// 用于注入实时数据访问类
+	snapshot db.Snapshot
+)
+
 /*
  从Rabbit MQ 中获取指令，并拼装TLV 协议
- */
-func Process() {
+*/
+func Process(snap db.Snapshot) {
+	snapshot = snap
+
 	rmConnection, err := amqp.Dial(base.DefaultConfig.RabbitMQAddress)
 	if err != nil {
 		panic(err)
@@ -55,7 +64,7 @@ func Process() {
 
 		pak := new(queuePacket)
 		if err = json.Unmarshal(d.Body, pak); err != nil {
-			glog.Write(2, packageName, "process", "deserialize queue packet failed, " + err.Error())
+			glog.Write(2, packageName, "process", "deserialize queue packet failed, "+err.Error())
 			d.Ack(false)
 			continue
 		}
@@ -63,7 +72,7 @@ func Process() {
 		glog.Write(4, packageName, "process", fmt.Sprintf("receive queue tag: %d, packet: %+v", d.DeliveryTag, pak))
 
 		if pak.DeviceType == 1 {
-			waterHeaterControl(pak)
+			_ = waterHeaterControl(pak)
 		} else {
 			glog.Write(3, packageName, "process", "unknown device.")
 		}
@@ -74,19 +83,26 @@ func Process() {
 
 /*
  拼接热水器控制报文，并下发到mqtt
- */
-func waterHeaterControl(qp *queuePacket) {
+*/
+func waterHeaterControl(qp *queuePacket) error {
+	waterHeater := equipment.NewWaterHeaterContext(snapshot)
 
-	sp := new(base.SendPacket)
-	sp.SerialNumber = qp.SerialNumber
+	if mainboardNumber, exist := waterHeater.GetMainboardNumber(qp.SerialNumber); exist {
+		controlMsg := send.NewWHControlMessage(qp.SerialNumber, mainboardNumber)
 
-	controlMsg := send.NewWHControlMessage(qp.SerialNumber, "")
+		sendPak := new(base.SendPacket)
+		sendPak.SerialNumber = qp.SerialNumber
+		sendPak.DeviceType = 1
 
-	switch qp.ControlType {
-	case 1:
-		sp.Payload = controlMsg.Power(qp.Option)
+		switch qp.ControlType {
+		case 1:
+			sendPak.Payload = controlMsg.Power(qp.Option)
+		}
+
+		base.MqttControlCh <- sendPak
+	} else {
+		glog.Write(3, packageName, "control", "cannot find mainboard number")
 	}
 
-	glog.Write(4, packageName, "control", fmt.Sprintf("sn: %s. MQTT control producer.", qp.SerialNumber))
-	base.MqttControlCh <- sp
+	return nil
 }

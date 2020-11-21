@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/robertzml/Gorgons/base"
+	"github.com/robertzml/Gorgons/db"
 	"github.com/robertzml/Gorgons/glog"
 	"github.com/robertzml/Gorgons/mqtt"
 	"github.com/robertzml/Gorgons/pipe"
@@ -27,14 +28,14 @@ func main() {
 	go startLog()
 
 	// 初始化redis连接池
-	_ = redis.Init()
+	redisClient := redis.Init()
 
 	// 启动 MQTT订阅服务
 	mqtt.InitMQTT()
 	go startControl()
 
 	// 启动接收数据处理
-	go startPipe()
+	go startPipe(redisClient)
 
 	// 阻塞
 	select{}
@@ -53,7 +54,7 @@ func startControl() {
 }
 
 // 启动接收数据处理
-func startPipe() {
+func startPipe(snap db.Snapshot) {
 	fmt.Println("start pipe service.")
-	pipe.Process()
+	pipe.Process(snap)
 }

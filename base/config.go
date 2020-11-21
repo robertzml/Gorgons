@@ -54,6 +54,9 @@ func InitConfig() {
 	DefaultConfig.MqttUsername = "glaucus"
 	DefaultConfig.MqttPassword = "123456"
 	DefaultConfig.RabbitMQAddress = "amqp://guest:guest@localhost:5672/"
+	DefaultConfig.RedisDatabase = 0
+	DefaultConfig.RedisServerAddress = "192.168.1.120:6379"
+	DefaultConfig.RedisPassword = "123456"
 	DefaultConfig.LogLevel = 3
 	DefaultConfig.LogToConsole = true
 }
