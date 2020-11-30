@@ -1,7 +1,7 @@
 package queue
 
 // 队列设备控制包类型
-type queueControlPacket struct {
+type controlPacket struct {
 	// 序列号
 	SerialNumber	string
 
@@ -19,7 +19,7 @@ type queueControlPacket struct {
 }
 
 // 队列设备反馈包类型
-type queueFeedbackPacket struct {
+type feedbackPacket struct {
 	// 序列号
 	SerialNumber	string
 
@@ -31,4 +31,19 @@ type queueFeedbackPacket struct {
 
 	// 控制参数
 	Option 			int
+}
+
+// 队列设备特殊包类型
+type specialPacket struct {
+	// 序列号
+	SerialNumber	string
+
+	// 设备类型
+	DeviceType		int
+
+	// 控制类型
+	ControlType		int
+
+	// 控制参数
+	Option 			string
 }

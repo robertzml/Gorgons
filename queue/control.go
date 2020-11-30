@@ -11,7 +11,7 @@ import (
 )
 
 /*
- 从Rabbit MQ 中获取指令，并拼装TLV 协议
+ 从Rabbit MQ 中获取控制队列指令，并拼装TLV 协议
 */
 func Control() {
 	rbChannel, err := rmConnection.Channel()
@@ -38,6 +38,8 @@ func Control() {
 
 	err = rbChannel.Qos(1, 0, false)
 
+	glog.Write(3, packageName, "Control", "declare control queue")
+
 	msgs, err := rbChannel.Consume(queue.Name, "", false, false, false, false, nil)
 	if err != nil {
 		panic(err)
@@ -45,7 +47,7 @@ func Control() {
 
 	for d := range msgs {
 
-		pak := new(queueControlPacket)
+		pak := new(controlPacket)
 		if err = json.Unmarshal(d.Body, pak); err != nil {
 			glog.Write(2, packageName, "Control", "deserialize queue packet failed, "+err.Error())
 			_ = d.Ack(false)
@@ -67,7 +69,7 @@ func Control() {
 /*
  拼接热水器控制报文，并下发到mqtt
 */
-func waterHeaterControl(qp *queueControlPacket) {
+func waterHeaterControl(qp *controlPacket) {
 	waterHeater := equipment.NewWaterHeaterContext(snapshot)
 
 	if mainboardNumber, exist := waterHeater.GetMainboardNumber(qp.SerialNumber); exist {

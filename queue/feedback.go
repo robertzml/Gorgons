@@ -6,6 +6,9 @@ import (
 	"github.com/robertzml/Gorgons/glog"
 )
 
+/**
+ 从Rabbit MQ 中获取反馈队列指令，并拼装TLV 协议
+ */
 func Feedback() {
 	rbChannel, err := rmConnection.Channel()
 	if err != nil {
@@ -29,6 +32,7 @@ func Feedback() {
 	}
 
 	err = rbChannel.Qos(1, 0, false)
+	glog.Write(3, packageName, "Feedback", "declare feedback queue")
 
 	msgs, err := rbChannel.Consume(queue.Name, "", false, false, false, false, nil)
 	if err != nil {
@@ -37,7 +41,7 @@ func Feedback() {
 
 	for d := range msgs {
 
-		pak := new(queueFeedbackPacket)
+		pak := new(feedbackPacket)
 		if err = json.Unmarshal(d.Body, pak); err != nil {
 			glog.Write(2, packageName, "Feedback", "deserialize queue packet failed, "+err.Error())
 			d.Ack(false)
@@ -59,6 +63,6 @@ func Feedback() {
 /**
 拼接热水器反馈报文，并下发到emq
  */
-func waterHeaterFeedback(qp *queueFeedbackPacket) {
+func waterHeaterFeedback(qp *feedbackPacket) {
 
 }

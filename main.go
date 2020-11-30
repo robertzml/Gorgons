@@ -37,7 +37,7 @@ func main() {
 	_ = queue.InitQueue(redisClient)
 
 	// 启动接收数据处理
-	go startPipe()
+	startPipe()
 
 	// 阻塞
 	select{}
@@ -58,6 +58,7 @@ func startControl() {
 // 启动接收数据处理
 func startPipe() {
 	fmt.Println("start queue service.")
-	queue.Control()
-	queue.Feedback()
+	go queue.Control()
+	go queue.Feedback()
+	go queue.Special()
 }
