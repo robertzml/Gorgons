@@ -1,4 +1,4 @@
-package pipe
+package queue
 
 // 队列设备控制包类型
 type queueControlPacket struct {

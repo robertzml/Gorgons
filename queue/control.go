@@ -1,41 +1,19 @@
-package pipe
+package queue
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/robertzml/Gorgons/base"
-	"github.com/robertzml/Gorgons/db"
 	"github.com/robertzml/Gorgons/equipment"
 	"github.com/robertzml/Gorgons/glog"
 	"github.com/robertzml/Gorgons/send"
-	"github.com/streadway/amqp"
 	"time"
-)
-
-const (
-	// 当前包名称
-	packageName = "pipe"
-
-	// 队列名称
-	queueName = "ControlQueue"
-)
-
-var (
-	// 用于注入实时数据访问类
-	snapshot db.Snapshot
 )
 
 /*
  从Rabbit MQ 中获取指令，并拼装TLV 协议
 */
-func Process(snap db.Snapshot) {
-	snapshot = snap
-
-	rmConnection, err := amqp.Dial(base.DefaultConfig.RabbitMQAddress)
-	if err != nil {
-		panic(err)
-	}
-
+func Control() {
 	rbChannel, err := rmConnection.Channel()
 	if err != nil {
 		panic(err)
@@ -43,13 +21,15 @@ func Process(snap db.Snapshot) {
 
 	defer func() {
 		if r := recover(); r != nil {
-			glog.Write(1, packageName, "process", fmt.Sprintf("catch runtime panic in process: %v", r))
+			glog.Write(1, packageName, "Control", fmt.Sprintf("catch runtime panic in control: %v", r))
 		}
 
-		rmConnection.Close()
 		rbChannel.Close()
-		glog.Write(3, packageName, "process", "process service is close.")
+		glog.Write(1, packageName, "Control", "control queue is close.")
 	}()
+
+	// 队列名称
+	queueName := "ControlQueue"
 
 	queue, err := rbChannel.QueueDeclare(queueName, true, false, false, false, nil)
 	if err != nil {
@@ -67,20 +47,20 @@ func Process(snap db.Snapshot) {
 
 		pak := new(queueControlPacket)
 		if err = json.Unmarshal(d.Body, pak); err != nil {
-			glog.Write(2, packageName, "process", "deserialize queue packet failed, "+err.Error())
-			d.Ack(false)
+			glog.Write(2, packageName, "Control", "deserialize queue packet failed, "+err.Error())
+			_ = d.Ack(false)
 			continue
 		}
 
-		glog.Write(4, packageName, "process", fmt.Sprintf("receive queue tag: %d, packet: %+v", d.DeliveryTag, pak))
+		glog.Write(4, packageName, "Control", fmt.Sprintf("receive queue tag: %d, packet: %+v", d.DeliveryTag, pak))
 
 		if pak.DeviceType == 1 {
 			waterHeaterControl(pak)
 		} else {
-			glog.Write(3, packageName, "process", "unknown device.")
+			glog.Write(3, packageName, "Control", "unknown device.")
 		}
 
-		d.Ack(false)
+		_ = d.Ack(false)
 	}
 }
 
