@@ -3,7 +3,10 @@ package queue
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/robertzml/Gorgons/base"
+	"github.com/robertzml/Gorgons/equipment"
 	"github.com/robertzml/Gorgons/glog"
+	"github.com/robertzml/Gorgons/send"
 )
 
 /**
@@ -64,5 +67,31 @@ func Feedback() {
 拼接热水器反馈报文，并下发到emq
  */
 func waterHeaterFeedback(qp *feedbackPacket) {
+	waterHeater := equipment.NewWaterHeaterContext(snapshot)
 
+	if mainboardNumber, exist := waterHeater.GetMainboardNumber(qp.SerialNumber); exist {
+		feedbackMsg := send.NewWHFeedbackMessage(qp.SerialNumber, mainboardNumber)
+
+		sendPak := new(base.SendPacket)
+		sendPak.SerialNumber = qp.SerialNumber
+		sendPak.DeviceType = 1
+
+		switch qp.ControlType {
+		case 1:
+			sendPak.Payload = feedbackMsg.Fast(qp.Option)
+		case 2:
+			sendPak.Payload = feedbackMsg.Cycle(qp.Option)
+		case 3:
+			sendPak.Payload = feedbackMsg.Reply()
+		default:
+			glog.Write(3, packageName, "feedback", "wrong control type.")
+			return
+		}
+
+		// 下发指令到mqtt
+		base.MqttControlCh <- sendPak
+	} else {
+
+		glog.Write(2, packageName, "feedback", fmt.Sprintf("sn: %s. equipment cannot found mainboard number.", qp.SerialNumber))
+	}
 }
