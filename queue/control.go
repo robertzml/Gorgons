@@ -77,7 +77,7 @@ func waterHeaterControl(qp *controlPacket) {
 
 		sendPak := new(base.SendPacket)
 		sendPak.SerialNumber = qp.SerialNumber
-		sendPak.DeviceType = 1
+		sendPak.DeviceType = qp.DeviceType
 
 		// 获取已保存的设置信息
 		_, set := waterHeater.LoadSetting(qp.SerialNumber)
@@ -106,10 +106,10 @@ func waterHeaterControl(qp *controlPacket) {
 			set.DeadlineTime = qp.Deadline
 		case 6: // 设定温度
 			sendPak.Payload = controlMsg.SetTemp(qp.Option)
-		case 7:
+		case 7: // 手动清洗
 			sendPak.Payload = controlMsg.Clean(qp.Option)
-		case 8:
-			sendPak.Payload = controlMsg.Clean(qp.Option)
+		case 8: // 数据清零
+			sendPak.Payload = controlMsg.Clear(int8(qp.Option))
 		default:
 			glog.Write(3, packageName, "control", "wrong control type.")
 			return

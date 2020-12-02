@@ -74,7 +74,7 @@ func waterHeaterFeedback(qp *feedbackPacket) {
 
 		sendPak := new(base.SendPacket)
 		sendPak.SerialNumber = qp.SerialNumber
-		sendPak.DeviceType = 1
+		sendPak.DeviceType = qp.DeviceType
 
 		switch qp.ControlType {
 		case 1:
@@ -91,7 +91,6 @@ func waterHeaterFeedback(qp *feedbackPacket) {
 		// 下发指令到mqtt
 		base.MqttControlCh <- sendPak
 	} else {
-
 		glog.Write(2, packageName, "feedback", fmt.Sprintf("sn: %s. equipment cannot found mainboard number.", qp.SerialNumber))
 	}
 }

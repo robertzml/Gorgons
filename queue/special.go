@@ -3,7 +3,10 @@ package queue
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/robertzml/Gorgons/base"
+	"github.com/robertzml/Gorgons/equipment"
 	"github.com/robertzml/Gorgons/glog"
+	"github.com/robertzml/Gorgons/send"
 )
 
 /**
@@ -64,5 +67,30 @@ func Special() {
 拼接热水器特殊指令报文，并下发到emq
 */
 func waterHeaterSpecial(qp *specialPacket) {
+	waterHeater := equipment.NewWaterHeaterContext(snapshot)
 
+	if mainboardNumber, exist := waterHeater.GetMainboardNumber(qp.SerialNumber); exist {
+		specialMsg := send.NewWHSpecialMessage(qp.SerialNumber, mainboardNumber)
+
+		sendPak := new(base.SendPacket)
+		sendPak.SerialNumber = qp.SerialNumber
+		sendPak.DeviceType = qp.DeviceType
+
+		switch qp.ControlType {
+		case 1:
+			sendPak.Payload = specialMsg.SoftFunction(qp.Option)
+		case 2:
+			sendPak.Payload = specialMsg.Special(qp.Option)
+		case 3:
+			sendPak.Payload = specialMsg.Manual(qp.Option)
+		case 4:
+			sendPak.Payload = specialMsg.Duplicate(qp.Option)
+		default:
+			glog.Write(3, packageName, "special", "wrong control type.")
+			return
+		}
+
+	} else {
+		glog.Write(2, packageName, "special", fmt.Sprintf("sn: %s. equipment cannot found mainboard number.", qp.SerialNumber))
+	}
 }
