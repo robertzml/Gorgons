@@ -1,6 +1,8 @@
 package send
 
-import "github.com/robertzml/Gorgons/tlv"
+import (
+	"github.com/robertzml/Gorgons/tlv"
+)
 
 // 设备特殊控制报文
 // 0x10 或 0x11
@@ -11,8 +13,8 @@ type wHSpecialMessage struct {
 }
 
 // 设备特殊控制报文构造函数
-func NewWHSpecialMessage(serialNumber string, mainboardNumber string) *wHSpecialMessage{
-	return &wHSpecialMessage{ SerialNumber: serialNumber, MainboardNumber:mainboardNumber  }
+func NewWHSpecialMessage(serialNumber string, mainboardNumber string) *wHSpecialMessage {
+	return &wHSpecialMessage{SerialNumber: serialNumber, MainboardNumber: mainboardNumber}
 }
 
 // 软件功能报文
@@ -71,7 +73,7 @@ func (msg *wHSpecialMessage) Duplicate(option string) string {
 	sn := tlv.Splice(0x127, msg.SerialNumber)
 	mn := tlv.Splice(0x12b, msg.MainboardNumber)
 
-	body := tlv.Splice(0x0011, sn + mn + msg.SpecialAction)
+	body := tlv.Splice(0x0011, sn+mn+msg.SpecialAction)
 
 	return head + body
 }

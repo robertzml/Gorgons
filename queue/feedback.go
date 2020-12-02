@@ -10,8 +10,8 @@ import (
 )
 
 /**
- 从Rabbit MQ 中获取反馈队列指令，并拼装TLV 协议
- */
+从Rabbit MQ 中获取反馈队列指令，并拼装TLV 协议
+*/
 func Feedback() {
 	rbChannel, err := rmConnection.Channel()
 	if err != nil {
@@ -65,7 +65,7 @@ func Feedback() {
 
 /**
 拼接热水器反馈报文，并下发到emq
- */
+*/
 func waterHeaterFeedback(qp *feedbackPacket) {
 	waterHeater := equipment.NewWaterHeaterContext(snapshot)
 
@@ -83,6 +83,8 @@ func waterHeaterFeedback(qp *feedbackPacket) {
 			sendPak.Payload = feedbackMsg.Cycle(qp.Option)
 		case 3:
 			sendPak.Payload = feedbackMsg.Reply()
+		case 4:
+			sendPak.Payload = feedbackMsg.Timing()
 		default:
 			glog.Write(3, packageName, "feedback", "wrong control type.")
 			return

@@ -3,6 +3,7 @@ package send
 import (
 	"github.com/robertzml/Gorgons/tlv"
 	"strconv"
+	"time"
 )
 
 // 设备状态反馈报文
@@ -10,12 +11,12 @@ import (
 type wHFeedbackMessage struct {
 	SerialNumber    string
 	MainboardNumber string
-	FeedbackAction   string
+	FeedbackAction  string
 }
 
 // 设备状态反馈报文构造函数
-func NewWHFeedbackMessage(serialNumber string, mainboardNumber string) *wHFeedbackMessage{
-	return &wHFeedbackMessage{ SerialNumber: serialNumber, MainboardNumber:mainboardNumber  }
+func NewWHFeedbackMessage(serialNumber string, mainboardNumber string) *wHFeedbackMessage {
+	return &wHFeedbackMessage{SerialNumber: serialNumber, MainboardNumber: mainboardNumber}
 }
 
 // 拼接设备状态反馈报文
@@ -25,11 +26,10 @@ func (msg *wHFeedbackMessage) splice() string {
 	sn := tlv.Splice(0x127, msg.SerialNumber)
 	mn := tlv.Splice(0x12b, msg.MainboardNumber)
 
-	body := tlv.Splice(0x0011, sn + mn + msg.FeedbackAction)
+	body := tlv.Splice(0x0011, sn+mn+msg.FeedbackAction)
 
 	return head + body
 }
-
 
 // 快速响应
 func (msg *wHFeedbackMessage) Fast(option int) string {
@@ -46,5 +46,11 @@ func (msg *wHFeedbackMessage) Cycle(option int) string {
 // 立即上报
 func (msg *wHFeedbackMessage) Reply() string {
 	msg.FeedbackAction = tlv.Splice(0x19, "1")
+	return msg.splice()
+}
+
+// 下发设备校时命令
+func (msg *wHFeedbackMessage) Timing() string {
+	msg.FeedbackAction = tlv.ParseDateTimeToString(time.Now())
 	return msg.splice()
 }
