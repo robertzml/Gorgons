@@ -1,0 +1,22 @@
+version: "3.7"
+services:
+  glaucus:
+    build:
+      context: .
+    image: gorgons
+    container_name: gorgons-1
+    volumes:
+      - type: bind
+        source: /etc/localtime
+        target: /etc/localtime
+        read_only: true
+      - type: bind
+        source: /home/zml/project/gorgons/config.json
+        target: /home/zml/gorgons/config.json
+        read_only: true
+    networks:
+      artemis-net:
+
+networks:
+  artemis-net:
+    name: artemis-network

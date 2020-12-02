@@ -22,8 +22,8 @@ var (
 
 /**
 初始化队列服务
- */
-func InitQueue(snap db.Snapshot) (err error){
+*/
+func InitQueue(snap db.Snapshot) (err error) {
 	snapshot = snap
 
 	rmConnection, err = amqp.Dial(base.DefaultConfig.RabbitMQAddress)

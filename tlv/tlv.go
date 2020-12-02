@@ -6,7 +6,7 @@ import (
 
 const (
 	HomeConsoleVersion = "Homeconsole04.00"
-	packageName = "tlv"
+	packageName        = "tlv"
 )
 
 type TLV struct {

@@ -11,7 +11,7 @@ var (
 	DefaultConfig Config
 
 	// MQTT 发送控制指令 channel
-	MqttControlCh  chan *SendPacket
+	MqttControlCh chan *SendPacket
 )
 
 // 配置
@@ -38,10 +38,10 @@ type Config struct {
 	RedisServerAddress string
 
 	// Redis 密码
-	RedisPassword 	string
+	RedisPassword string
 
 	// 日志级别
-	LogLevel	int
+	LogLevel int
 
 	// 输出日志到控制台
 	LogToConsole bool
@@ -62,7 +62,7 @@ func InitConfig() {
 }
 
 // 载入配置文件
-func LoadConfig()  {
+func LoadConfig() {
 	file, err := os.Open("./config.json")
 	if err != nil {
 		fmt.Printf("cannot open the config file.\n")
@@ -71,7 +71,7 @@ func LoadConfig()  {
 	}
 
 	defer func() {
-		_  = file.Close()
+		_ = file.Close()
 	}()
 
 	decoder := json.NewDecoder(file)
