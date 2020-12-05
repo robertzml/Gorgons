@@ -19,9 +19,6 @@ type Config struct {
 	// MQTT 服务器地址
 	MqttServerAddress string
 
-	// MQTT HTTP服务地址
-	MqttServerHttp string
-
 	// MQTT 用户名
 	MqttUsername string
 
@@ -50,7 +47,6 @@ type Config struct {
 // 初始化默认配置
 func InitConfig() {
 	DefaultConfig.MqttServerAddress = "tcp://192.168.1.120:1883"
-	DefaultConfig.MqttServerHttp = "http://192.168.1.120:18083"
 	DefaultConfig.MqttUsername = "glaucus"
 	DefaultConfig.MqttPassword = "123456"
 	DefaultConfig.RabbitMQAddress = "amqp://guest:guest@localhost:5672/"
