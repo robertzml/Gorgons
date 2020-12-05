@@ -98,3 +98,33 @@ func (msg *whControlMessage) Clear(status int8) string {
 
 	return msg.splice()
 }
+
+// 修订加热时间
+func (msg *whControlMessage) SetHeatTime(heatTime int) string {
+	msg.ControlAction = tlv.Splice(0x35, tlv.ParseDateTimeToHourString(heatTime))
+	return msg.splice()
+}
+
+// 修订使用热水量
+func (msg *whControlMessage) SetHotWater(hotWater int) string {
+	msg.ControlAction = tlv.Splice(0x36, tlv.ParseCumulateToString(hotWater))
+	return msg.splice()
+}
+
+// 修订累积工作时间
+func (msg *whControlMessage) SetWorkTime(workTime int) string {
+	msg.ControlAction = tlv.Splice(0x37, tlv.ParseDateTimeToHourString(workTime))
+	return msg.splice()
+}
+
+// 修订累积使用用电量
+func (msg *whControlMessage) SetUsedPower(usedPower int) string {
+	msg.ControlAction = tlv.Splice(0x38, tlv.ParseCumulateToString(usedPower))
+	return msg.splice()
+}
+
+// 修订累积节省电量
+func (msg *whControlMessage) SetSavePower(savePower int) string {
+	msg.ControlAction = tlv.Splice(0x39, tlv.ParseCumulateToString(savePower))
+	return msg.splice()
+}

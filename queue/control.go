@@ -110,6 +110,16 @@ func waterHeaterControl(qp *controlPacket) {
 			sendPak.Payload = controlMsg.Clean(qp.Option)
 		case 8: // 数据清零
 			sendPak.Payload = controlMsg.Clear(int8(qp.Option))
+		case 10:
+			sendPak.Payload = controlMsg.SetHeatTime(qp.Option)
+		case 11:
+			sendPak.Payload = controlMsg.SetHotWater(qp.Option)
+		case 12:
+			sendPak.Payload = controlMsg.SetWorkTime(qp.Option)
+		case 13:
+			sendPak.Payload = controlMsg.SetUsedPower(qp.Option)
+		case 14:
+			sendPak.Payload = controlMsg.SetSavePower(qp.Option)
 		default:
 			glog.Write(3, packageName, "control", "wrong control type.")
 			return
