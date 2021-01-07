@@ -64,6 +64,8 @@ func Control() {
 
 		_ = d.Ack(false)
 	}
+
+	glog.Write(3, packageName, "Control", "control queue reach end")
 }
 
 /*

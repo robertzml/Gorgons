@@ -61,6 +61,8 @@ func Feedback() {
 
 		d.Ack(false)
 	}
+
+	glog.Write(3, packageName, "Feedback", "feedback queue reach end")
 }
 
 /**

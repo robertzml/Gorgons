@@ -61,6 +61,8 @@ func Special() {
 
 		d.Ack(false)
 	}
+
+	glog.Write(3, packageName, "Special", "special queue reach end")
 }
 
 /**
